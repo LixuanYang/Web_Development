@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+
+  <head>
+    <title>Micro 04</title>
+    <style>
+      #operand1{
+        float:left;
+        position:relative;
+        width:200px;
+        height:100px;
+        text-align: center;
+        padding-top:25px;
+        padding-bottom: 25px;
+        box-sizing: border-box;
+        font-size: 40px;
+      }
+      #operator{
+        position:absolute;
+        left:226px;
+        text-align: center;
+        margin-top: 40px;
+
+      }
+      #operand2{
+        position:absolute;
+        width:200px;
+        height:100px;
+        left:273px;
+        text-align: center;
+        padding-top:25px;
+        padding-bottom: 25px;
+        box-sizing: border-box;
+        font-size: 40px;
+      }
+
+      #equal{
+        position:absolute;
+        left:520px;
+        text-align: center;
+        margin-top: 40px;
+      }
+
+      #result{
+        position:absolute;
+        width:200px;
+        height:100px;
+        left:550px;
+        text-align: center;
+        padding-top: 25px;
+        font-size: 40px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Micro 04</h1>
+    <div>
+    <textarea id='operand1'></textarea>
+    </div>
+
+    <div>
+    <select id='operator'>
+      <option value='add'>+</option>
+      <option value='minus'>-</option>
+      <option value='multiply'>*</option>
+      <option value='divide'>/</option>
+    </select>
+    </div>
+
+    <div>
+    <textarea id='operand2'></textarea>
+    </div>
+
+    <button id='equal'>=</button>
+
+    <div id='result'>?</div>
+    <script>
+
+    let op1 = document.getElementById('operand1')
+    let operator = document.getElementById('operator')
+    let op2 = document.getElementById('operand2')
+    let res = document.getElementById('result')
+    let btn = document.getElementById('equal')
+
+    btn.onclick = function(event){
+      if (operator.value == 'add'){
+        res.innerHTML = parseInt(op1.value)+parseInt(op2.value)
+      }
+      else if (operator.value == 'minus'){
+        res.innerHTML = parseInt(op1.value)-parseInt(op2.value)
+      }
+      else if (operator.value == 'multiply'){
+        res.innerHTML = parseInt(op1.value)*parseInt(op2.value)
+      }
+      else if (operator.value == 'divide'){
+        res.innerHTML = parseInt(op1.value)/parseInt(op2.value)
+      }
+    }
+
+
+    </script>
+
+  </body>
+
+</html>

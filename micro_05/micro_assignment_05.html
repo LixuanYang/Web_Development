@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+
+  <head>
+    <title>Micro 05</title>
+    <style>
+      .box{
+        float:left;
+        box-sizing: border-box;
+        position:relative;
+      }
+
+
+
+    </style>
+  </head>
+
+  <body>
+    <h1>Micro 05</h1>
+    <button id='addBox'>Add box to page in 1 second</button>
+    <button id='left'>Spin Left</button>
+    <button id='right'>Spin Right</button>
+    <button id='right in 1 sec'>Spin Right in 1 Sec</button>
+    <button id='stop'>Stop</button><br><br>
+    <div>
+    <img src='icon.png'>
+    </div>
+
+    <div></div>
+
+
+    <script>
+
+    let addbtn = document.getElementById('addBox')
+    let lbtn = document.getElementById('left')
+    let rbtn = document.getElementById('right')
+    let stopbtn = document.getElementById('stop')
+    let r1sec = document.getElementById('right in 1 sec')
+
+    //generate random color for the added box
+    function generateRandomColor() {
+      return `#${Math.floor(Math.random()*16777215).toString(16)}`;
+    }
+
+    //add box
+    function addbox() {
+      let randw = Math.floor(Math.random()*(100-25+1)+25);
+      let randh = Math.floor(Math.random()*(250-25+1)+25);
+      let divbox = document.querySelectorAll('div')[1];
+
+      let addb = document.createElement('div');
+
+      addb.classList.add('box');
+      addb.style.width = randw+'px';
+      addb.style.height = randh +'px';
+      addb.style.backgroundColor = generateRandomColor();
+      divbox.appendChild(addb);
+
+    }
+
+    addbtn.addEventListener('click', function(event){
+      setTimeout(addbox,1000);
+    })
+
+    //control spin
+    var currdeg = 0;
+    var controlleft;
+    var controlright;
+    stopbtn.addEventListener('click',function(event){
+      clearInterval(controlleft);
+      clearInterval(controlright);
+
+    })
+
+    lbtn.addEventListener('click', function(event){
+      clearInterval(controlleft);
+      clearInterval(controlright);
+      controlleft = setInterval(leftspin,30);
+    })
+
+    rbtn.addEventListener('click', function(event){
+      clearInterval(controlleft);
+      clearInterval(controlright);
+      controlright = setInterval(rightspin,30);
+    })
+
+    var spinimg = document.querySelectorAll('div')[0].firstElementChild;
+
+
+    function rightspin(){
+
+      currdeg +=1;
+      spinimg.style.transform = `rotate(${currdeg}deg)`;
+
+    }
+
+    function leftspin(){
+      currdeg -=1;
+      spinimg.style.transform = `rotate(${currdeg}deg)`;
+
+    }
+
+    r1sec.addEventListener('click', function(event){
+      setTimeout(rightspin,1000);
+    })
+
+
+    </script>
+
+  </body>
+
+</html>
