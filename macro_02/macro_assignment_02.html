@@ -1,0 +1,190 @@
+<!doctype html>
+<html>
+
+  <head>
+
+    <style>
+      #container {
+        width: 1280px;
+        height: 994px;
+
+        margin: auto;
+        position: relative;
+      }
+
+      .transbox{
+        position:absolute;
+        width:350px;
+        height:75px;
+        opacity: 0.8;
+        top:140px;
+        left:20px;
+        font-weight: bold;
+        background-color: white;
+        border-radius: 15px;
+        padding-top: 9px;
+        padding-bottom: 5px;
+        padding-left: 10px;
+        box-sizing: border-box;
+      }
+      #luckpic1{
+        position:absolute;
+
+        height:200px;
+        width:auto;
+        top:220px;
+        left:20px;
+        border-radius: 30px;
+      }
+      #luckpic2{
+        position:absolute;
+
+        height:200px;
+        width:auto;
+        top:220px;
+        left:225px;
+        border-radius: 30px;
+      }
+      #luckpic3{
+        position:absolute;
+
+        height:200px;
+        width:auto;
+        top:220px;
+        left:425px;
+        border-radius: 30px;
+      }
+      h1 {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 300%;
+        color: white;
+      }
+
+      #legobody {
+        position: absolute;
+        bottom: 0px;
+        right: 200px;
+      }
+
+      #legohead {
+        position: absolute;
+        bottom: 275px;
+        right: 275px;
+      }
+
+
+    </style>
+
+  </head>
+
+
+  <body>
+
+    <div id="container">
+
+      <script>
+
+        var words = ['Awesome', 'Fantastic', 'Fabulous', 'Superb', 'Perfect', 'Brilliant', 'Coming up Roses'];
+
+        var choice = parseInt( Math.random() * words.length );
+
+        document.write(`<h1>Everything is ${words[choice]}!</h1>`)
+
+        var body = ['body1.png','body2.png','body3.png','body4.png','body5.png','body6.png'];
+
+        var bodyChoice = parseInt(Math.random() * body.length);
+
+        document.write(`<img id="legobody" src="${body[bodyChoice]}">`)
+
+        var head = ['head1.png','head2.png','head3.png','head4.png','head5.png','head6.png'];
+
+        var headChoice = parseInt(Math.random() * head.length);
+
+        document.write(`<img id="legohead" src="${head[headChoice]}">`)
+
+
+
+      </script>
+
+      <script>
+
+        // ask the browser to tell us what time it is
+        let now = new Date();
+
+        // grab the hours, minutes and seconds
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+
+        //get 12-hr time format, return an array for later use
+        function AMPM(hours){
+          let result;
+          let ampm;
+          let formatHr;
+          let formatmin;
+          let backimg;
+          let greeting;
+          if (hours>= 12) {
+            formatHr=hours-12;
+            ampm='pm';
+            if (hours >=18 && hours <24){
+              backimg = 'evening';
+              greeting = 'Good Evening!';
+            }
+            else{
+              backimg = 'afternoon';
+              greeting = 'Good Afternoon!';
+            }
+          }
+          else{
+            formatHr=hours;
+            ampm='am';
+            if (hours >=0 && hours <6){
+              backimg = 'night';
+              greeting = 'Good Night!';
+            }
+            else{
+              backimg = 'morning';
+              greeting = 'Good Morning!';
+            }
+          }
+
+          //return 12-hr formatted hour, am/pm,background image name,corresponding greeting
+          result=[formatHr, ampm, backimg, greeting];
+
+          return result
+        }
+        //randomly generate a length-3 lucky number arr with unique number
+        function luckNum(){
+          let arr=[];
+
+          while (arr.length <3 ){
+            let newNum = parseInt(Math.random() * 10);
+            if (arr.includes(newNum)==false && newNum!=0){
+              arr.push(newNum);
+            }
+          }
+          return arr;
+        }
+        let luckarr=luckNum();//store randomly generated lucky number array
+        console.log(luckarr);
+
+        //text in information box
+        document.write(`<div class="transbox">The time is currently ${AMPM(hours)[0]}:${minutes}${AMPM(hours)[1]} - ${AMPM(hours)[3]}
+        <br><br>Your three lucky numbers today are:</div>`);
+
+        //show the graphics corresponded to the randomly generated lucky number
+        document.write(`<img id=luckpic1 src="${luckarr[0]}.jpg">`);
+        document.write(`<img id=luckpic2 src="${luckarr[1]}.jpg">`);
+        document.write(`<img id=luckpic3 src="${luckarr[2]}.jpg">`);
+
+        //show background image
+      document.write(`<img src="${AMPM(hours)[2]}.png">`)
+      </script>
+
+    </div>
+
+  </body>
+
+</html>

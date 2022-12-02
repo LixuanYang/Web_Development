@@ -1,0 +1,344 @@
+<!doctype html>
+<html>
+
+  <head>
+    <title>Gotta Catch 'em All!</title>
+
+    <style>
+
+      #forest {
+        background-image: url('images/environment_forestbackground.png');
+        width: 800px;
+        height: 600px;
+        position: relative;
+        float: left;
+        margin-right: 50px;
+      }
+
+      #grass1 {
+        position: absolute;
+        left: 0px;
+        bottom: 0px;
+      }
+
+      #grass2 {
+        position: absolute;
+        left: 270px;
+        bottom: 0px;
+      }
+
+      #grass3 {
+        position: absolute;
+        left: 540px;
+        bottom: 0px;
+      }
+
+      .grass:hover {
+        background-color: yellow;
+        opacity: 0.5;
+      }
+
+      #playagain {
+        display: none;
+      }
+
+      /*display pokedex*/
+      #result{
+        display: none;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="container">
+      <div id="forest">
+        <img class="grass" id="grass1" src="images/grass.png">
+        <img class="grass" id="grass2" src="images/grass.png">
+        <img class="grass" id="grass3" src="images/grass.png">
+      </div>
+
+      <div id="game">
+        <h1>Gotta Catch 'em All!</h1>
+        <p>Your goal in this game is to earn as many Pokeballs as possible while catching a variety of Pokemon along the way.<br><br>
+        To play simply click on the three grass clumps in the forest. Behind one of those grass clumps is a Pokemon that can be caught.
+        Behind another grass clump are two free Pokeballs that you can use to try again, and behind the last grass clump is nothing. <br><br>
+        Note that each time you pick a grass clump you will be using one of your Pokeballs, and when you run out the game will be over!</p>
+        <p id='current_progress' style='font-weight:bold; font-size:25px;'>Your progress so far...</p>
+        <p id="output_pokeballs">Pokeballs left: 5</p>
+        <p id="output_pokecaught">Pokemon caught: 0</p>
+        <button id="playagain">Play Again</button>
+
+      </div>
+      <div id='result'>
+        <h3></h3>
+      </div>
+
+    </div>
+
+
+    <script>
+
+      // we need to keep track of how many pokeballs the user has
+      // as well as how many pokemon they have caught
+      let pokeBalls = 5;
+      let pokemonCaught = 0;
+
+      // get a DOM reference to our desired HTML elements
+      let g1 = document.getElementById('grass1');
+      let g2 = document.getElementById('grass2');
+      let g3 = document.getElementById('grass3');
+
+      // set up DOM references for our output divs
+      let outputPokeballs = document.getElementById('output_pokeballs');
+      let outputPokecaught = document.getElementById('output_pokecaught');
+      let playAgain = document.getElementById('playagain');
+      let currProgress = document.getElementById('current_progress');
+
+      let pokemon = ['images/pikachu.png', 'images/bulbasaur.png', 'images/charmander.png', 'images/eevee.png', 'images/squirtle.png'];
+      let names = ['Pikachu', 'Bulbasaur', 'Charmander', 'Eevee', 'Squirtle'];
+      let gameContinue = true;//check if gameover
+      let pokedex = {Pikachu:0, Bulbasaur:0, Charmander:0, Eevee:0, Squirtle:0};//record the caught pokemon type & number
+
+
+      // wire up an event listener to respond when the user clicks option
+      // grass1
+      g1.onclick = function() {
+        if (gameContinue){
+          // it costs 1 pokeball to do this
+          pokeBalls -= 1;
+
+          // the user has clicked on grass1!
+          let chance = parseInt( Math.random() * 3 );
+
+          if (chance == 0) {
+            // this is a pokemon!
+            let pokeChoice = parseInt(Math.random()*pokemon.length);
+            g1.src = pokemon[pokeChoice];
+            pokemonCaught += 1;
+            currProgress.innerHTML = `You caught a(n) ${names[pokeChoice]}!`
+            pokedex[`${names[pokeChoice]}`] +=1;
+          }
+          else if (chance == 1) {
+            // this is the extra pokeballs!
+            g1.src = 'images/pokeballs.png';
+            pokeBalls += 2;
+            currProgress.innerHTML = 'You found two Pokeballs!'
+          }
+          else {
+            // there's nothing here!
+            g1.src = '';
+            currProgress.innerHTML = 'Nothing Here!'
+          }
+
+          // overwrite our output divs to contain the new values of our
+          // variables
+          outputPokeballs.innerHTML = 'Pokeballs left: ' + pokeBalls;
+          outputPokecaught.innerHTML = 'Pokemon caught: ' + pokemonCaught;
+
+          // show the play agian button
+          playAgain.style.display = 'block';
+
+          if (pokeBalls==0){
+            gameContinue = false;
+            //show result message
+
+            let product = 1;
+            for (let key in pokedex){
+
+              product = product*pokedex[key];
+              console.log(product);
+            }
+            let result = document.getElementById('result');
+            result.firstElementChild.innerHTML = `You have caught:<br> Pikachu:${pokedex['Pikachu']}<br>Bulbasaur:${pokedex['Bulbasaur']}<br>Charmander:${pokedex['Charmander']}<br>Eevee:${pokedex['Eevee']}<br>Squirtle:${pokedex['Squirtle']}<br>`
+            result.style.display = 'block';
+            if (product >=1){
+              let hooray = document.createElement('p');
+              hooray.innerHTML = 'Congratulations! Pokemon Trainer! You have caught at least one for each type of Pokemon!';
+              hooray.style.color = 'blue';
+              hooray.style.textAlign = 'center';
+              hooray.style.fontWeight = "500";
+              hooray.style.fontSize = '20pt';
+              document.getElementById('result').appendChild(hooray);
+            }
+            //hide playagain button
+            playAgain.style.display = 'none';
+            //show gameover message
+            let gameover = document.createElement('p');
+            gameover.innerHTML = 'Game Over !'
+            gameover.style.color = 'red';
+            gameover.style.textAlign = 'center';
+            gameover.style.fontWeight = "500";
+            gameover.style.fontSize = '20pt';
+            document.getElementById('game').appendChild(gameover);
+            console.log(pokedex);
+        }
+
+
+        }}
+
+        // grass2
+        g2.onclick = function() {
+          if (gameContinue){
+            // it costs 1 pokeball to do this
+            pokeBalls -= 1;
+
+            // the user has clicked on grass1!
+            let chance = parseInt( Math.random() * 3 );
+
+            if (chance == 0) {
+              // this is a pokemon!
+              let pokeChoice = parseInt(Math.random()*pokemon.length);
+              g2.src = pokemon[pokeChoice];
+              pokemonCaught += 1;
+              currProgress.innerHTML = `You caught a(n) ${names[pokeChoice]}!`
+              pokedex[`${names[pokeChoice]}`] +=1;
+            }
+            else if (chance == 1) {
+              // this is the extra pokeballs!
+              g2.src = 'images/pokeballs.png';
+              pokeBalls += 2;
+              currProgress.innerHTML = 'You found two Pokeballs!'
+            }
+            else {
+              // there's nothing here!
+              g2.src = '';
+              currProgress.innerHTML = 'Nothing Here!'
+            }
+
+            // overwrite our output divs to contain the new values of our
+            // variables
+            outputPokeballs.innerHTML = 'Pokeballs left: ' + pokeBalls;
+            outputPokecaught.innerHTML = 'Pokemon caught: ' + pokemonCaught;
+
+            // show the play agian button
+            playAgain.style.display = 'block';
+
+            if (pokeBalls==0){
+              gameContinue = false;
+              //show result message
+              let product = 1;
+              for (let key in pokedex){
+
+                product = product*pokedex[key];
+                console.log(product);
+              }
+              let result = document.getElementById('result');
+              result.firstElementChild.innerHTML = `You have caught:<br> Pikachu:${pokedex['Pikachu']}<br>Bulbasaur:${pokedex['Bulbasaur']}<br>Charmander:${pokedex['Charmander']}<br>Eevee:${pokedex['Eevee']}<br>Squirtle:${pokedex['Squirtle']}<br>`
+              result.style.display = 'block';
+              if (product >=1){
+                console.log(product);
+                let hooray = document.createElement('p');
+                hooray.innerHTML = 'Congratulations! Pokemon Trainer! You have caught at least one for each type of Pokemon!';
+                hooray.style.color = 'blue';
+                hooray.style.textAlign = 'center';
+                hooray.style.fontWeight = "500";
+                hooray.style.fontSize = '20pt';
+                document.getElementById('result').appendChild(hooray);
+              }
+              //hide playagain button
+              playAgain.style.display = 'none';
+              //show gameover message
+              let gameover = document.createElement('p');
+              gameover.innerHTML = 'Game Over !'
+              gameover.style.color = 'red';
+              gameover.style.textAlign = 'center';
+              gameover.style.fontWeight = "500";
+              gameover.style.fontSize = '20pt';
+              document.getElementById('game').appendChild(gameover);
+              console.log(pokedex);
+          }
+
+
+          }}
+          // grass3
+          g3.onclick = function() {
+            if (gameContinue){
+              // it costs 1 pokeball to do this
+              pokeBalls -= 1;
+
+              // the user has clicked on grass1!
+              let chance = parseInt( Math.random() * 3 );
+
+              if (chance == 0) {
+                // this is a pokemon!
+                let pokeChoice = parseInt(Math.random()*pokemon.length);
+                g3.src = pokemon[pokeChoice];
+                pokemonCaught += 1;
+                currProgress.innerHTML = `You caught a(n) ${names[pokeChoice]}!`
+                pokedex[`${names[pokeChoice]}`] +=1;
+              }
+              else if (chance == 1) {
+                // this is the extra pokeballs!
+                g3.src = 'images/pokeballs.png';
+                pokeBalls += 2;
+                currProgress.innerHTML = 'You found two Pokeballs!'
+              }
+              else {
+                // there's nothing here!
+                g3.src = '';
+                currProgress.innerHTML = 'Nothing Here!'
+              }
+
+              // overwrite our output divs to contain the new values of our
+              // variables
+              outputPokeballs.innerHTML = 'Pokeballs left: ' + pokeBalls;
+              outputPokecaught.innerHTML = 'Pokemon caught: ' + pokemonCaught;
+
+              // show the play agian button
+              playAgain.style.display = 'block';
+
+              //at the end of the game
+              if (pokeBalls==0){
+                gameContinue = false;
+                //show result message
+
+                let product = 1;
+                for (let key in pokedex){
+
+                  product = product*pokedex[key];
+                  console.log(product);
+                }
+                let result = document.getElementById('result');
+                result.firstElementChild.innerHTML = `You have caught:<br> Pikachu:${pokedex['Pikachu']}<br>Bulbasaur:${pokedex['Bulbasaur']}<br>Charmander:${pokedex['Charmander']}<br>Eevee:${pokedex['Eevee']}<br>Squirtle:${pokedex['Squirtle']}<br>`
+                result.style.display = 'block';
+                if (product >=1){
+                  let hooray = document.createElement('p');
+                  hooray.innerHTML = 'Congratulations! Pokemon Trainer! You have caught at least one for each type of Pokemon!';
+                  hooray.style.color = 'blue';
+                  hooray.style.textAlign = 'center';
+                  hooray.style.fontWeight = "500";
+                  hooray.style.fontSize = '20pt';
+                  document.getElementById('result').appendChild(hooray);
+                }
+                //hide playagain button
+                playAgain.style.display = 'none';
+                //show gameover message
+                let gameover = document.createElement('p');
+                gameover.innerHTML = 'Game Over !'
+                gameover.style.color = 'red';
+                gameover.style.textAlign = 'center';
+                gameover.style.fontWeight = "500";
+                gameover.style.fontSize = '20pt';
+                document.getElementById('game').appendChild(gameover);
+                console.log(pokedex);
+            }
+
+            }}
+
+      playAgain.onclick = function() {
+        g1.src = 'images/grass.png';
+        g2.src = 'images/grass.png';
+        g3.src = 'images/grass.png';
+        playAgain.style.display = 'none';
+      }
+
+
+
+
+
+    </script>
+
+  </body>
+
+</html>
