@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Design Your own Hogwarts!</title>
+    <style type="text/css">
+
+    #left{
+      width:322px;
+      height:322px;
+      float:left;
+      border:1px solid black;
+      box-sizing: border-box;
+    }
+
+    .leftChild{
+      width:32px;
+      height:32px;
+      float:left;
+      box-sizing: border-box;
+    }
+    .leftChild:hover{
+      border:2px solid red;
+      box-sizing: border-box;
+    }
+
+    #right{
+      margin-left:32px;
+      width:730px;
+      float:left;
+      box-sizing: border-box;
+    }
+    #hr{
+      clear:both;
+    }
+
+    .selected{
+      border:3px solid yellow;
+      width:32px;
+      height:32px;
+      box-sizing: border-box;
+    }
+    </style>
+  </head>
+
+  <body>
+    <h1>Design Your Own Hogwarts!</h1>
+    <div id='left'></div>
+    <div id='right'>Click on a tile here to select it. Then click on the map to the left to place the tile.<hr></div>
+
+    <!-- load in the image array file - this makes available a new array of all image filenames that you can use for this project -->
+    <!-- Assets courtesy of Crawl Stone Soup: https://github.com/crawl/tiles -->
+    <script src="image_array.js"></script>
+    <script>
+    //organize tiles on the right
+    for (let i = 0; i < array_library.length; i++) {
+      let imgTile = document.createElement('img');
+      imgTile.src = array_library[i];
+      imgTile.style.margin = '2px';
+      document.getElementById('right').appendChild(imgTile);
+    }
+
+    //show selected when a tile is clicked
+    let arrTile = document.getElementById('right').getElementsByTagName('img');
+
+    //create a global variable holding the selected tile from the right
+    var tileSelect;
+
+    //click event on the right
+    for(let i=0;i<arrTile.length;i++){
+
+      arrTile[i].onclick = function(event){
+        let currSelect = document.querySelector('.selected');
+        if (currSelect){
+          currSelect.classList.remove('selected')
+        }
+        event.currentTarget.classList.add('selected');
+        tileSelect = event.currentTarget;
+
+      }
+    }
+
+    //organize divs on the left
+    for (let i = 0; i < 100; i++) {
+      let imgDiv = document.createElement('div');
+      imgDiv.classList.add('leftChild')
+      document.getElementById('left').appendChild(imgDiv);
+    }
+
+    //click event on the left
+    let leftDiv = document.querySelectorAll('.leftChild');
+    for(let i=0;i<leftDiv.length;i++){
+      leftDiv[i].onclick = function(event){
+        event.currentTarget.style.backgroundImage = `url(${tileSelect.src})`;
+      }
+    }
+
+
+    </script>
+
+
+  </body>
+</html>
