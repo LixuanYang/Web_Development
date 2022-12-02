@@ -1,0 +1,240 @@
+
+<!doctype html>
+<html>
+  <head>
+    <title>Let's Chat!</title>
+
+    <!-- custom styles for this application -->
+    <style>
+      #messages {
+        display: block;
+        width: 500px;
+        height: 300px;
+      }
+      .hidden {
+        display: none;
+      }
+
+    </style>
+  </head>
+  <body>
+    <h1>Let's Chat!</h1>
+
+    <div id="panel_name">
+      Name: <input type="text" id="name">
+      <button id="savename">Chat</button><br>
+
+    </div>
+    <p id='reminder'></p>
+    <div id="panel_chat" class="hidden">
+      <select id="chatroom">
+        <option value="room1">room1</option>
+        <option value="room2">room2</option>
+        <option value="room3">room3</option>
+
+      </select>
+      <textarea id="messages" readonly></textarea>
+      <input type="text" id="newmessage">
+      <button id="sendmessage">Send Message</button><br>
+      <input type="text" id="newname">
+      <button id="changename">Change Name</button>
+
+    </div>
+    <a href="index.html">Homepage</a><br>
+
+    <!-- bring in the jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- custom script for this application -->
+    <script>
+
+      // grab some DOM refs
+      let panel_name = document.querySelector("#panel_name");
+      let panel_chat = document.querySelector("#panel_chat");
+      let name = document.querySelector("#name");
+      let savename = document.querySelector("#savename");
+      let changename = document.querySelector("#changename");
+      let newname = document.querySelector("#newname");
+      let chatroom=document.querySelector("#chatroom");
+      let reminder = document.querySelector('#reminder');
+
+
+      //remember username
+      let localname = window.localStorage.getItem('username');
+      if (localname){
+
+        reminder.innerHTML = 'You are currently logged in as '+localname+'!';
+        // show the chat panel_chat
+        panel_chat.classList.remove('hidden');
+
+
+        // hide this panel
+        panel_name.classList.add('hidden');
+      }
+
+      // when the user clicks on the save name we need to progress to the next phase of the program
+
+      savename.onclick = function(event) {
+
+        // grab the name the user entered
+
+        window.localStorage.setItem('username',name.value);
+        
+        let username = window.localStorage.getItem('username');
+        //identify which chatroom
+        let chtroom=document.querySelector("#chatroom").value;
+        // make sure it has at least one character in it
+
+        if (username.length > 0) {
+
+          reminder.innerHTML = 'You are currently logged in as '+localname+'!';
+          // show the chat panel_chat
+          panel_chat.classList.remove('hidden');
+
+          // hide this panel
+          panel_name.classList.add('hidden');
+          $.ajax({
+
+            type: 'POST',
+            url: 'userlogin.php',
+            data: {
+              chatroom: chtroom,
+              nickname: username
+
+            },
+            success: function(data, status) {
+              console.log("success log!");
+            },
+            error: function(req, data, status) {
+
+            }
+
+          });
+        }
+      }
+
+      //log when user change its name
+      changename.onclick = function(event){
+        window.localStorage.setItem('username',newname.value);
+        //identify which chatroom
+        let chtroom=document.querySelector("#chatroom").value;
+        let reminder = document.querySelector('#reminder');
+        reminder.innerHTML = 'You are currently logged in as '+newname.value+'!';
+        $.ajax({
+
+          type: 'POST',
+          url: 'userlogin.php',
+          data: {
+            chatroom: chtroom,
+            nickname: newname.value
+
+          },
+          success: function(data, status) {
+            console.log("success log!");
+          },
+          error: function(req, data, status) {
+
+          }
+
+        });
+
+      }
+
+      //log when user switch chat room
+      chatroom.onchange=function(event){
+        let username = window.localStorage.getItem('username');
+        let chtroom=document.querySelector("#chatroom").value;
+        $.ajax({
+
+          type: 'POST',
+          url: 'userlogin.php',
+          data: {
+            chatroom: chtroom,
+            nickname: username
+
+          },
+          success: function(data, status) {
+            console.log("success log!");
+          },
+          error: function(req, data, status) {
+
+          }
+
+        });
+
+      }
+
+      let messages = document.querySelector("#messages");
+      let newmessage = document.querySelector("#newmessage");
+      let sendmessage = document.querySelector("#sendmessage");
+
+      // when the user chooses to chat we need to send that data to the server to be stored
+      sendmessage.onclick = function(event) {
+        let username = window.localStorage.getItem('username');
+        // package up this message and send it to the server to be stored for later use
+        let msg = newmessage.value;
+        let chtroom = document.querySelector("#chatroom").value;
+
+
+        $.ajax({
+
+          type: 'POST',
+          url: 'savemessage.php',
+          data: {
+            message: msg,
+            nickname: username,
+            chatroom: chtroom
+
+          },
+          success: function(data, status) {
+            console.log("success!");
+            if (data=='short'){
+              alert('Message too short!');
+            }
+            else if (data=='bad'){
+              alert('Message contains bad word(s)!');
+            }
+
+          },
+          error: function(req, data, status) {
+
+          }
+
+        });
+      }
+
+
+      // function to grab data from the server
+      function getData() {
+
+        let currentroom=document.querySelector("#chatroom").value;
+
+
+        // contact the text file and grab its current value
+        $.ajax({
+          type: 'GET',
+          url: `data/${currentroom}.txt?nocache=${Math.random()}`,
+          success: function(data, status) {
+
+            messages.value = data;
+
+            setTimeout( getData(), 1000 );
+          }
+        });
+
+        //set scroll bar default to bottom
+        let text = document.querySelector("#messages");
+        text.onmouseout = function(){
+          text.scrollTop=text.scrollHeight;
+        }
+
+
+      }
+      getData();
+
+
+
+    </script>
+
+  </body>
+</html>

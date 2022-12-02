@@ -1,0 +1,509 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Memory</title>
+    <link rel="shortcut icon" type="image/jpg" href="assignment06_images/chansey.png"/>
+
+    <style>
+      body {
+        background-color: black;
+        color: white;
+        font-family: monospace;
+        text-align: center;
+      }
+      .hidden {
+        display: none;
+      }
+
+      #tokens {
+        width: 400px;
+        height: 300px;
+        margin: auto;
+      }
+
+      #tokens img {
+        width: 100px;
+        height: 100px;
+      }
+
+      h1{
+        font-size: 50px;
+      }
+      p{
+        font-size: 20px;
+      }
+      div{
+        font-size: 20px;
+      }
+
+    </style>
+  </head>
+  <body>
+
+    <h1>Memory Matching Madness!</h1>
+
+    <!-- start screen -->
+    <div id="screen_start" data-level='easy'>
+      <p>Play a fast-paced game of 'memory' and try and beat your best time!</p>
+      <p>Please select your preferred level below</p>
+      <button id="start">Start</button>
+
+      <select id="levels">
+        <option value="easy">easy</option>
+        <option value="medium">medium</option>
+        <option value="hard">hard</option>
+
+      </select>
+    </div>
+
+
+    <!-- game play screen -->
+    <div id="screen_game" class="hidden">
+      <div id="timer">0 seconds</div>
+      <div id="tokens">
+
+
+      </div>
+    </div>
+
+
+    <!-- game over screen -->
+    <div id="screen_gameover" class="hidden">
+      <div>Your time was X ... that didn't beat the best time</div>
+      <button id="again">Play again</button>
+    </div>
+
+    <audio id='correct'>
+      <source src='assignment06_images/correct.wav' type='audio/wav'>
+    </audio>
+    <audio id='wrong'>
+      <source src='assignment06_images/wrong.wav' type='audio/wav'>
+    </audio>
+
+    <script>
+      //easy level score record
+      //1st place
+      window.localStorage.setItem('ezbestTime1',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('ez1st','null ');
+      //2nd place
+      window.localStorage.setItem('ezbestTime2',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('ez2nd','null ');
+      //3rd place
+      window.localStorage.setItem('ezbestTime3',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('ez3rd','null ');
+
+      //medium level score record
+      //1st place
+      window.localStorage.setItem('medbestTime1',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('med1st','null ');
+      //2nd place
+      window.localStorage.setItem('medbestTime2',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('med2nd','null ');
+      //3rd place
+      window.localStorage.setItem('medbestTime3',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('med3rd','null ');
+
+      //hard level score record
+      //1st place
+      window.localStorage.setItem('hardbestTime1',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('hard1st','null ');
+      //2nd place
+      window.localStorage.setItem('hardbestTime2',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('hard2nd','null ');
+      //3rd place
+      window.localStorage.setItem('hardbestTime3',Number.POSITIVE_INFINITY);
+      window.localStorage.setItem('hard3rd','null ');
+
+
+      //user is prompted to select difficulty level: easy, medium, hard
+      document.querySelector('#levels').addEventListener('change',function (event){
+        document.getElementById('screen_start').dataset.level = event.currentTarget.value;
+        console.log(event.currentTarget.value);
+      })
+
+
+      // isolate our DOM queries
+      let screen_start = document.querySelector('#screen_start');
+      let screen_game = document.querySelector('#screen_game');
+      let screen_gameover = document.querySelector('#screen_gameover');
+      let start = document.querySelector('#start');
+      let tokens = document.querySelector('#tokens');
+
+      // array of all pokemon graphics
+      var assets = ['snorlax.png', 'electrabuzz.png', 'chansey.png', 'oddish.png',
+              'pikachu.png', 'paras.png', 'arcanine.png', 'ponita.png',
+              'venonat.png', 'eggsecute.png', 'machop.png', 'pidgey.png',
+              'psyduck.png', 'tauros.png', 'vulpix.png', 'gloom.png',
+              'krabby.png', 'butterfree.png', 'bulbasaur.png', 'clefairy.png',
+              'koffing.png', 'goldeen.png', 'magikarp.png', 'beedrill.png',
+              'lapras.png', 'meowth.png', 'ekans.png', 'jigglypuff.png',
+              'horsea.png', 'polywog.png', 'sandshrew.png', 'rattata.png',
+              'gengar.png', 'eevee.png', 'bellsprout.png', 'squirtle.png',
+              'seel.png', 'caterpie.png']
+
+      // vars to keep track of which elements were clicked
+      let token1 = false;
+      let token2 = false;
+
+
+
+
+      // when the user click start we need to show the game playing screen
+      start.addEventListener('click', function() {
+
+
+
+
+        //the number of paired-images correspond to different levels
+        var num =6;
+        var level = document.querySelector('#screen_start').dataset.level;
+        console.log(level)
+        if (level=='easy'){num=6;}
+        else if (level=='medium'){num=10;}
+        else if (level=='hard'){num=15;}
+
+
+        let time=0;
+        let timecounter = setInterval(countTime,1000);
+        function countTime(){
+          time+=1;
+          document.querySelector('#timer').innerHTML = time+" seconds"
+        }
+
+        // make the start screen invisible
+        screen_start.classList.add('hidden');
+
+        // show the playing screen
+        screen_game.classList.remove("hidden");
+
+        // create 12 pokeballs for the user to click on
+
+
+        // pick num random pokemon
+        let pickedPokemon = [];
+
+        for (let i = 0; i < num; i++) {
+          let randomP = parseInt( Math.random() * assets.length );
+          pickedPokemon.push( assets[randomP] );
+          pickedPokemon.push( assets[randomP] );
+          assets.splice( randomP, 1 );
+        }
+
+        let counter_match = 0;
+        // randomize the pokemon in our array
+        while (pickedPokemon.length > 0) {
+          //change game display according to user's difficulty level,default display 3*4
+          if (num==10){tokens.style.width = '500px';tokens.style.height = '400px';}
+          else if (num==15){tokens.style.width = '600px';tokens.style.height = '500px';}
+          else if (num==6){tokens.style.width = '400px';tokens.style.height = '300px';}
+
+          let tempImage = document.createElement('img');
+          tempImage.src = 'assignment06_images/pokeball.png';
+
+          let secretIndex = parseInt( Math.random() * pickedPokemon.length );
+          tempImage.dataset.secret = pickedPokemon[ secretIndex ];
+          tempImage.dataset.matching = 'unmatched';
+          pickedPokemon.splice( secretIndex, 1 );
+
+          tokens.appendChild( tempImage );
+
+
+          tempImage.addEventListener('click', function(event) {
+            if (event.currentTarget.dataset.matching=='unmatched'){
+            // if this is the first one clicked, show the image as-is
+            if (token1 == false ) {
+              // this becomes token1!
+              token1 = event.currentTarget;
+
+              // reveal our secret image
+              event.currentTarget.src = 'assignment06_images/' + event.currentTarget.dataset.secret;
+
+            }
+
+            // if this is the SECOND one clicked, we need to evaluate
+            else if (token2==false ) {
+
+              if (token1!=event.currentTarget ){
+              // must be on token2
+              token2 = event.currentTarget;
+
+              // reveal our secret image
+              event.currentTarget.src = 'assignment06_images/' + event.currentTarget.dataset.secret;
+
+
+
+
+              if (token1.dataset.secret == token2.dataset.secret ) {
+                token1.dataset.matching='matched';
+                token2.dataset.matching='matched';
+                correct.play()
+                console.log("MATCH!");
+                token1 = false;
+                token2 = false;
+                counter_match +=1;
+                if (counter_match==num){//game comes to end
+                  if (num==6){
+                    let bestscore1 = window.localStorage.getItem('ezbestTime1');
+                    let bestscore2 = window.localStorage.getItem('ezbestTime2');
+                    let bestscore3 = window.localStorage.getItem('ezbestTime3');
+                    let name1 = window.localStorage.getItem('ez1st').split(" ")[0];
+                    let name2 = window.localStorage.getItem('ez2nd').split(" ")[0];
+                    let name3 = window.localStorage.getItem('ez3rd').split(" ")[0];
+
+                    //rank 1
+                    if (time<=bestscore1){
+                      //update ranking
+                      window.localStorage.setItem('ezbestTime1',time);
+                      window.localStorage.setItem('ezbestTime2',bestscore1);
+                      window.localStorage.setItem('ezbestTime3',bestscore2);
+
+                      //ask username
+                      var user = prompt('Congratulations! You won 1st place, What is your username?');
+                      //update leaderboard
+                      window.localStorage.setItem('ez1st',`${user} time:${time}s`);
+                      window.localStorage.setItem('ez2nd',`${name1} time:${bestscore1}s`);
+                      window.localStorage.setItem('ez3rd',`${name2} time:${bestscore2}s`);
+
+                      screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s <br> Best Time:${time}s Congratulations! You won 1st place!`;
+
+                    }
+
+                    //rank 2
+                    else if (time<=bestscore2){
+                      //update ranking
+
+                      window.localStorage.setItem('ezbestTime2',time);
+                      window.localStorage.setItem('ezbestTime3',bestscore2);
+                      //ask username
+                      var user = prompt('Congratulations! You won 2nd place, What is your username?');
+                      //update leaderboard
+                      window.localStorage.setItem('ez2nd',`${user} time:${time}s`);
+                      window.localStorage.setItem('ez3rd',`${name2} time:${bestscore2}s`);
+                      screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s Best Time:${bestscore1}s Congratulations! You won 2nd place!`;
+
+                    }
+
+                    //rank 3
+                    else if (time<=bestscore3){
+                      //update ranking
+                      window.localStorage.setItem('ezbestTime3',time);
+                      //ask username
+                      var user = prompt('Congratulations! You won 2nd place, What is your username?');
+                      //update leaderboard
+                      window.localStorage.setItem('ez3rd',`${user} time:${time}s`);
+                      screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s Best Time:${bestscore1}s Congratulations! You won 3rd place!`;
+
+                    }
+
+                    //rank >3
+                    else{
+                      screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s You did not beat the top 3 people:(`;
+                    }
+                    let board = document.createElement('div');
+                    let leader1 = window.localStorage.getItem('ez1st');
+                    let leader2 = window.localStorage.getItem('ez2nd');
+                    let leader3 = window.localStorage.getItem('ez3rd');
+
+                    board.innerHTML = `Easy LeaderBoard:<br> 1st place:${leader1} <br> 2nd place:${leader2} <br> 3rd place:${leader3}`;
+
+                    if (screen_gameover.children.length==3){
+                      screen_gameover.lastElementChild.remove();
+                    }
+                    screen_gameover.appendChild(board);
+                    board.style.fontSize='20pt';
+                    screen_game.classList.add("hidden");
+                    screen_gameover.classList.remove('hidden');
+                }
+                else if (num==10){
+                  let bestscore1 = window.localStorage.getItem('medbestTime1');
+                  let bestscore2 = window.localStorage.getItem('medbestTime2');
+                  let bestscore3 = window.localStorage.getItem('medbestTime3');
+                  let name1 = window.localStorage.getItem('med1st').split(" ")[0];
+                  let name2 = window.localStorage.getItem('med2nd').split(" ")[0];
+                  let name3 = window.localStorage.getItem('med3rd').split(" ")[0];
+
+                  //rank 1
+                  if (time<=bestscore1){
+                    //update ranking
+                    window.localStorage.setItem('medbestTime1',time);
+                    window.localStorage.setItem('medbestTime2',bestscore1);
+                    window.localStorage.setItem('medbestTime3',bestscore2);
+
+                    //ask username
+                    var user = prompt('Congratulations! You won 1st place, What is your username?');
+                    //update leaderboard
+                    window.localStorage.setItem('med1st',`${user} time:${time}s`);
+                    window.localStorage.setItem('med2nd',`${name1} time:${bestscore1}s`);
+                    window.localStorage.setItem('med3rd',`${name2} time:${bestscore2}s`);
+
+                    screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s Best Time:${time}s Congratulations! You won 1st place!`;
+
+                  }
+
+                  //rank 2
+                  else if (time<=bestscore2){
+                    //update ranking
+
+                    window.localStorage.setItem('medbestTime2',time);
+                    window.localStorage.setItem('medbestTime3',bestscore2);
+                    //ask username
+                    var user = prompt('Congratulations! You won 2nd place, What is your username?');
+                    //update leaderboard
+                    window.localStorage.setItem('med2nd',`${user} time:${time}s`);
+                    window.localStorage.setItem('med3rd',`${name2} time:${bestscore2}s`);
+                    screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s Best Time:${bestscore1}s Congratulations! You won 2nd place!`;
+
+                  }
+
+                  //rank 3
+                  else if (time<=bestscore3){
+                    //update ranking
+                    window.localStorage.setItem('medbestTime3',time);
+                    //ask username
+                    var user = prompt('Congratulations! You won 2nd place, What is your username?');
+                    //update leaderboard
+                    window.localStorage.setItem('med3rd',`${user} time:${time}s`);
+                    screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s Best Time:${bestscore1}s Congratulations! You won 3rd place!`;
+
+                  }
+
+                  //rank >3
+                  else{
+                    screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s You did not beat the top 3 people:(`;
+                  }
+                  let board = document.createElement('div');
+                  board.style.fontSize='20pt';
+                  let leader1 = window.localStorage.getItem('med1st');
+                  let leader2 = window.localStorage.getItem('med2nd');
+                  let leader3 = window.localStorage.getItem('med3rd');
+
+                  board.innerHTML = `Medium LeaderBoard:<br> 1st place:${leader1}<br> 2nd place:${leader2}<br> 3rd place:${leader3}`;
+
+                  if (screen_gameover.children.length==3){
+                    screen_gameover.lastElementChild.remove();
+                  }
+                  screen_gameover.appendChild(board);
+                  screen_game.classList.add("hidden");
+                  screen_gameover.classList.remove('hidden');
+                }
+
+                else if (num==15){
+                  let bestscore1 = window.localStorage.getItem('hardbestTime1');
+                  let bestscore2 = window.localStorage.getItem('hardbestTime2');
+                  let bestscore3 = window.localStorage.getItem('hardbestTime3');
+                  let name1 = window.localStorage.getItem('hard1st').split(" ")[0];
+                  let name2 = window.localStorage.getItem('hard2nd').split(" ")[0];
+                  let name3 = window.localStorage.getItem('hard3rd').split(" ")[0];
+
+                  //rank 1
+                  if (time<=bestscore1){
+                    //update ranking
+                    window.localStorage.setItem('hardbestTime1',time);
+                    window.localStorage.setItem('hardbestTime2',bestscore1);
+                    window.localStorage.setItem('hardbestTime3',bestscore2);
+
+                    //ask username
+                    var user = prompt('Congratulations! You won 1st place, What is your username?');
+                    //update leaderboard
+                    window.localStorage.setItem('hard1st',`${user} time:${time}s`);
+                    window.localStorage.setItem('hard2nd',`${name1} time:${bestscore1}s`);
+                    window.localStorage.setItem('hard3rd',`${name2} time:${bestscore2}s`);
+
+                    screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s Best Time:${time}s Congratulations! You won 1st place!`;
+
+                  }
+
+                  //rank 2
+                  else if (time<=bestscore2){
+                    //update ranking
+
+                    window.localStorage.setItem('hardbestTime2',time);
+                    window.localStorage.setItem('hardbestTime3',bestscore2);
+                    //ask username
+                    var user = prompt('Congratulations! You won 2nd place, What is your username?');
+                    //update leaderboard
+                    window.localStorage.setItem('hard2nd',`${user} time:${time}s`);
+                    window.localStorage.setItem('hard3rd',`${name2} time:${bestscore2}s`);
+                    screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s Best Time:${bestscore1}s Congratulations! You won 2nd place!`;
+
+                  }
+
+                  //rank 3
+                  else if (time<=bestscore3){
+                    //update ranking
+                    window.localStorage.setItem('hardbestTime3',time);
+                    //ask username
+                    var user = prompt('Congratulations! You won 2nd place, What is your username?');
+                    //update leaderboard
+                    window.localStorage.setItem('hard3rd',`${user} time:${time}s`);
+                    screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s Best Time:${bestscore1}s Congratulations! You won 3rd place!`;
+
+                  }
+
+                  //rank >3
+                  else{
+                    screen_gameover.firstElementChild.innerHTML=`Your Time: ${time}s You did not beat the top 3 people:(`;
+                  }
+                  let board = document.createElement('div');
+                  board.style.fontSize='20pt';
+                  let leader1 = window.localStorage.getItem('hard1st');
+                  let leader2 = window.localStorage.getItem('hard2nd');
+                  let leader3 = window.localStorage.getItem('hard3rd');
+
+                  board.innerHTML = `Hard LeaderBoard:<br> 1st place:${leader1}<br> 2nd place:${leader2}<br>3rd place:${leader3}`;
+
+                  if (screen_gameover.children.length==3){
+                    screen_gameover.lastElementChild.remove();
+                  }
+                  screen_gameover.appendChild(board);
+                  screen_game.classList.add("hidden");
+                  screen_gameover.classList.remove('hidden');
+                }
+
+                  document.querySelector('#again').addEventListener('click',function(){
+                    clearInterval(timecounter);
+                    document.querySelector('#timer').innerHTML = '0 seconds';
+                    screen_gameover.classList.add('hidden');
+                    screen_start.classList.remove('hidden');
+                    while(tokens.children.length>0){
+                      tokens.lastElementChild.remove();
+                    }
+
+                  })
+                  }
+                }
+              else {
+
+                wrong.play();
+                // in 1/2 second reset these tokens
+                setTimeout( reset, 500 );
+              }
+
+            }
+          }
+
+
+
+        }});
+        }
+
+
+      });
+
+
+      function reset() {
+        // hide both tokens
+        token1.src = 'assignment06_images/pokeball.png';
+        token2.src = 'assignment06_images/pokeball.png';
+
+        // flip the tokens back to false to reset for the next match
+        token1 = false;
+        token2 = false;
+      }
+
+
+    </script>
+
+
+  </body>
+</html>
